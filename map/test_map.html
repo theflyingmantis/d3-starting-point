@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Map of India</title>
+<script src='https://d3js.org/d3.v4.min.js'></script>
+<script src="../lodash.js"></script>
+<script src="ind_map.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<style>
+#tooltip{
+   position: absolute;
+   z-index: 2;
+   background: rgba(0,153,76,0.8);
+   width:130px;
+   height:20px;
+   color:white;
+   font-size: 14px;
+   padding:5px;
+   top:-150px;
+   left:-150px;
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
+   "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+</style>
+</head>
+
+<body>
+<div id="tooltip"></div>
+<script type="text/javascript">
+	
+	d3.select("svg").remove();
+	var margin = {top: 20, right: 20, bottom: 30, left: 40},
+	  width = 960 - margin.left - margin.right,
+	  height = 500 - margin.top - margin.bottom;
+	  active = d3.select(null);
+
+		var hover = function(d){
+    var div = document.getElementById('tooltip');
+    div.style.left = event.pageX +'px';
+    div.style.top = event.pageY + 'px';
+    div.innerHTML = d.properties.NAME_1;
+	};
+
+		var colorscale = d3.scaleLinear()
+						 .domain([0,255])
+						 .range(["yellow","blue"]);
+
+
+	var svg = d3.select("body").append("svg")
+	    		.attr("width", width + margin.left + margin.right)
+	    		.attr("height", height + margin.top + margin.bottom)
+	  			.append("g")
+	    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	var projection = d3.geoMercator()
+               .translate([0, 0])
+               .scale(1);
+
+        //Define path generator
+	var path = d3.geoPath()
+             .projection(projection);
+
+	var delhi=[77.1,28.7];	//longitube and then latitude
+
+	d3.json('india_states.json',function(error,data){
+		var b = path.bounds(data),
+            s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+            t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+			// new projection
+    projection = d3.geoMercator()
+                   .scale(s).translate(t);
+    path = path.projection(projection);
+
+    d3.select('g').selectAll( "path" )
+	  .data( data.features )
+	  .enter()
+	  .append( "path" )
+	  .attr( "fill", function(d){return colorscale(Math.floor(Math.random() * 255)) })
+	  .attr("opacity",0.8)
+	  .attr( "d", path )
+	  .on("click", clicked);
+
+
+	  d3.select('g').selectAll("circle")
+		.data([delhi]).enter()
+		.append("circle")
+		.attr("cx", function (d) { console.log(projection(d)); return projection(d)[0]; })
+		.attr("cy", function (d) { return projection(d)[1]; })
+		.attr("r", "2px")
+		.attr("fill", "red")
+	});
+
+function clicked(d) {
+  if (active.node() === this) return reset();
+  active.classed("active", false);
+  active = d3.select(this).classed("active", true);
+
+  var bounds = path.bounds(d),
+      dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[1][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2,
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = .9 / Math.max(dx / width, dy / height),
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+ d3.select('g').transition()
+      .duration(1000)
+      .style("stroke-width", 1.5 / scale + "px")
+      .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+}
+
+function reset() {
+  active.classed("active", false);
+  active = d3.select(null);
+
+  d3.select('g').transition()
+      .duration(1000)
+      .style("stroke-width", "1.5px")
+      .attr("transform", "");
+}
+
+</script>
+</body>
+</html>

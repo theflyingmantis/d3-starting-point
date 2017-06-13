@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Histogram</title>
+<!-- <script src="https://d3js.org/d3.v3.min.js"></script> -->
+<script src='https://d3js.org/d3.v4.min.js'></script>
+<script src="lodash.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<style>
+#tooltip{
+   position: absolute;
+   z-index: 2;
+   background: rgba(0,153,76,0.8);
+   width:130px;
+   height:20px;
+   color:white;
+   font-size: 14px;
+   padding:5px;
+   top:-150px;
+   left:-150px;
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
+   "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+</style>
+</head>
+
+<body>
+<div id="rainBarGraph"></div>
+<div id="tooltip"></div>
+<input type = 'text' id = 'year' value='1901'>
+
+<button id='buttonYear'>Make Histogram</button>
+<script src="rainBarGraph.js"></script>
+
+</body>
+</html>
